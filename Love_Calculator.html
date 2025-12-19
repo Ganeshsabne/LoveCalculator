@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Soulmates Calculator</title>
+    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>💖</text></svg>">
+
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&family=Playfair+Display:ital,wght@1,600&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary: #ff3366;
+            --secondary: #ff5e62;
+            --glass-bg: rgba(255, 255, 255, 0.75);
+            --glass-border: rgba(255, 255, 255, 0.5);
+            --text-main: #2d1b21;
+            --text-light: #666;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: 'Outfit', sans-serif;
+            background: linear-gradient(-45deg, #ff9a9e, #fad0c4, #ffd1ff, #a1c4fd);
+            background-size: 400% 400%;
+            animation: gradientBG 12s ease infinite;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            color: var(--text-main);
+        }
+
+        @keyframes gradientBG {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .card {
+            background: var(--glass-bg);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid var(--glass-border);
+            width: 90%;
+            max-width: 400px;
+            border-radius: 24px;
+            padding: 40px 30px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+            position: relative;
+            text-align: center;
+            transition: height 0.3s ease;
+        }
+
+        h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 2.2rem;
+            background: -webkit-linear-gradient(45deg, var(--primary), var(--secondary));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 8px;
+        }
+
+        .subtitle {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 30px;
+            letter-spacing: 0.5px;
+        }
+
+        .input-group {
+            position: relative;
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .input-group input {
+            width: 100%;
+            padding: 16px;
+            border: 2px solid transparent;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 14px;
+            outline: none;
+            font-size: 1rem;
+            transition: 0.3s all;
+            font-family: 'Outfit', sans-serif;
+        }
+
+        .input-group label {
+            position: absolute;
+            left: 16px;
+            top: 18px;
+            color: #888;
+            pointer-events: none;
+            transition: 0.3s ease;
+            font-size: 1rem;
+        }
+
+        .input-group input:focus,
+        .input-group input:valid {
+            background: #fff;
+            border-color: var(--primary);
+            box-shadow: 0 4px 15px rgba(255, 51, 102, 0.1);
+        }
+
+        .input-group input:focus ~ label,
+        .input-group input:valid ~ label {
+            transform: translateY(-28px) translateX(-5px);
+            font-size: 0.8rem;
+            color: var(--primary);
+            font-weight: 600;
+        }
+
+        .btn-main {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(45deg, var(--primary), var(--secondary));
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 8px 20px rgba(255, 51, 102, 0.3);
+            transition: transform 0.2s, box-shadow 0.2s;
+            margin-top: 10px;
+        }
+
+        .btn-main:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 25px rgba(255, 51, 102, 0.4);
+        }
+
+        .btn-ghost {
+            margin-top: 25px;
+            background: transparent;
+            color: #777;
+            border: 1px solid rgba(0,0,0,0.1);
+            padding: 10px 25px;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: 0.2s;
+        }
+        .btn-ghost:hover { border-color: var(--primary); color: var(--primary); }
+
+        .processing-view {
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 20px 0;
+        }
+        
+        .radar-spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid rgba(255, 51, 102, 0.1);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 20px;
+        }
+        
+        .status-text {
+            font-weight: 500;
+            color: var(--text-light);
+            animation: pulseText 1.5s infinite;
+        }
+
+        .result-view {
+            display: none;
+            animation: slideUp 0.5s ease-out;
+        }
+
+        .score-circle {
+            width: 120px;
+            height: 120px;
+            background: white;
+            border-radius: 50%;
+            margin: 0 auto 15px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            font-size: 3rem;
+            font-weight: 700;
+            color: var(--primary);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.08);
+            position: relative;
+        }
+        
+        .score-circle::after {
+            content: '%';
+            font-size: 1.2rem;
+            position: absolute;
+            top: 35px;
+            right: 20px;
+            color: #999;
+        }
+
+        .verdict {
+            font-family: 'Playfair Display', serif;
+            font-size: 1.4rem;
+            font-style: italic;
+            color: #333;
+            margin-bottom: 25px;
+        }
+
+        .stats-row {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-bottom: 10px;
+        }
+        
+        .stat-card {
+            background: rgba(255,255,255,0.5);
+            padding: 10px;
+            border-radius: 12px;
+            flex: 1;
+            font-size: 0.85rem;
+        }
+        .stat-card b { display: block; font-size: 1.1rem; color: var(--primary); margin-top: 5px; }
+
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+        @keyframes pulseText { 0% { opacity: 0.6; } 50% { opacity: 1; } 100% { opacity: 0.6; } }
+
+        #splash-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: #fff;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            transition: opacity 0.8s ease;
+        }
+        .heart-icon { font-size: 4rem; animation: beat 1s infinite; }
+        @keyframes beat { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.2); } }
+
+    </style>
+</head>
+<body>
+
+    <div id="splash-screen">
+        <div class="heart-icon">💖</div>
+        <p style="margin-top: 15px; color: #888; font-weight: 500; letter-spacing: 1px;">Soulmates Calculator...</p>
+    </div>
+
+    <div class="card">
+        
+        <div id="input-view">
+            <h1>Love Calculator</h1>
+            <p class="subtitle">AI-Powered Compatibility Check</p>
+
+            <div class="input-group">
+                <input type="text" id="name1" required autocomplete="off">
+                <label>Your Name</label>
+            </div>
+
+            <div class="input-group">
+                <input type="text" id="name2" required autocomplete="off">
+                <label>Partner's Name</label>
+            </div>
+
+            <button class="btn-main" onclick="startProcess()">Calculate Match</button>
+        </div>
+
+        <div id="processing-view" class="processing-view">
+            <div class="radar-spinner"></div>
+            <p id="status-text" class="status-text">Connecting to Love Satellites...</p>
+        </div>
+
+        <div id="result-view" class="result-view">
+            <div class="score-circle">
+                <span id="final-score">0</span>
+            </div>
+            <div class="verdict" id="verdict">Checking...</div>
+
+            <div class="stats-row">
+                <div class="stat-card">Passion<br><b id="score-passion">0%</b></div>
+                <div class="stat-card">Trust<br><b id="score-trust">0%</b></div>
+                <div class="stat-card">Vibe<br><b id="score-vibe">0%</b></div>
+            </div>
+
+            <button class="btn-ghost" onclick="resetApp()">Try Another Couple</button>
+        </div>
+
+    </div>
+
+    <script>
+        window.addEventListener('load', () => {
+            setTimeout(() => {
+                const splash = document.getElementById('splash-screen');
+                splash.style.opacity = '0';
+                setTimeout(() => { splash.style.display = 'none'; }, 800);
+            }, 1800);
+        });
+
+        function startProcess() {
+            const n1 = document.getElementById('name1').value.trim();
+            const n2 = document.getElementById('name2').value.trim();
+
+            if(!n1 || !n2) {
+                alert("Both names are required for the magic to work! ✨");
+                return;
+            }
+
+            document.getElementById('input-view').style.display = 'none';
+            document.getElementById('processing-view').style.display = 'flex';
+            document.getElementById('result-view').style.display = 'none';
+
+            const statusLabel = document.getElementById('status-text');
+            const messages = [
+                "Scanning Zodiac Alignment...",
+                "Analyzing Name Numerology...",
+                "Measuring Heartbeat Resonance...",
+                "Finalizing Report..."
+            ];
+
+            let step = 0;
+            const interval = setInterval(() => {
+                if(step < messages.length) {
+                    statusLabel.innerText = messages[step];
+                    step++;
+                } else {
+                    clearInterval(interval);
+                    showResults(n1, n2);
+                }
+            }, 800);
+        }
+
+        function showResults(name1, name2) {
+            document.getElementById('processing-view').style.display = 'none';
+            document.getElementById('result-view').style.display = 'block';
+
+            const combined = (name1 + name2).toLowerCase();
+            let hash = 0;
+            for (let i = 0; i < combined.length; i++) {
+                hash = combined.charCodeAt(i) + ((hash << 5) - hash);
+            }
+            
+            let score = (Math.abs(hash) % 51) + 50; 
+            
+            if(combined.match(/[love]/g)) score += 4;
+            if(score > 100) score = 100;
+
+            let passion = Math.min(100, score + (hash % 10) - 5);
+            let trust = Math.min(100, score + (hash % 15) - 5);
+            let vibe = Math.min(100, score + (hash % 8) - 2);
+
+            let text = "";
+            if (score > 90) text = "Twin Flames! 🔥";
+            else if (score > 80) text = "Soulmates Forever ❤️";
+            else if (score > 70) text = "Amazing Chemistry ✨";
+            else if (score > 60) text = "Looking Good! 😉";
+            else text = "Work on it! 🌱";
+
+            document.getElementById('verdict').innerText = text;
+
+            animateCount("final-score", 0, score, 1500);
+            animateCount("score-passion", 0, passion, 1500, "%");
+            animateCount("score-trust", 0, trust, 1500, "%");
+            animateCount("score-vibe", 0, vibe, 1500, "%");
+        }
+
+        function animateCount(id, start, end, duration, suffix="") {
+            const obj = document.getElementById(id);
+            let startTime = null;
+            
+            const step = (timestamp) => {
+                if (!startTime) startTime = timestamp;
+                const progress = Math.min((timestamp - startTime) / duration, 1);
+                obj.innerText = Math.floor(progress * (end - start) + start) + suffix;
+                if (progress < 1) {
+                    window.requestAnimationFrame(step);
+                }
+            };
+            window.requestAnimationFrame(step);
+        }
+
+        function resetApp() {
+            document.getElementById('result-view').style.display = 'none';
+            document.getElementById('input-view').style.display = 'block';
+            document.getElementById('name1').value = "";
+            document.getElementById('name2').value = "";
+        }
+    </script>
+</body>
+</html>
